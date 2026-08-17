@@ -115,3 +115,64 @@ form button:hover,
   form button:hover,
   .mobile-content button:hover { transform: none; }
 }
+
+.audio-toggle { display: grid; place-items: center; min-width: 2.25rem; }
+.audio-toggle svg { width: 1.1rem; height: 1.1rem; fill: currentColor; }
+.audio-toggle.is-active { color: #b8d7ff; }
+
+.begin-overlay {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1.35rem;
+  padding: 2rem;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(30, 71, 127, .2), transparent 42%),
+    rgba(3, 6, 13, .96);
+}
+
+.begin-overlay p,
+.begin-overlay span {
+  margin: 0;
+  color: #abc5e8;
+  font-size: .67rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+
+.begin-overlay h1 {
+  max-width: 13ch;
+  margin: .35rem 0 1rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2.9rem, 6vw, 5.6rem);
+  font-weight: 400;
+  letter-spacing: -.05em;
+  line-height: 1.02;
+}
+
+.begin-overlay button {
+  min-height: 48px;
+  padding: .95rem 1.3rem;
+  border: 1px solid rgba(188, 213, 247, .68);
+  border-radius: 2px;
+  background: rgba(101, 139, 190, .18);
+  color: var(--paper);
+  font-size: .68rem;
+  letter-spacing: .18em;
+  transition: background-color .24s ease, transform .24s cubic-bezier(.25, 1, .5, 1);
+}
+
+.begin-overlay button:hover,
+.begin-overlay button:focus-visible {
+  background: rgba(110, 153, 210, .36);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 360px) {
+  nav button:nth-child(1),
+  nav button:nth-child(2) { display: none; }
+}

@@ -13,5 +13,6 @@
 | `09-waitlist-background.png` | user-supplied final image | Scenes 8–9 real-world and waitlist backgrounds |
 | `with text/*` | supplied reference frames | composition/copy reference only; never shipped as UI |
 | `kripa-scroll-story.mp4` | user-supplied video, locally transcoded to H.264 | desktop scroll-scrubbed story layer |
+| `kripa-atmosphere.mp3` | user-supplied audio | opt-in ambient soundtrack |
 
 No Higgsfield-generated asset is included.

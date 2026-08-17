@@ -36,6 +36,9 @@ export default function Home() {
   const [mobile, setMobile] = useState(false);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
+  const [audioOn, setAudioOn] = useState(false);
+  const [started, setStarted] = useState(false);
+  const audio = useRef<HTMLAudioElement>(null);
   const reduced = useReducedMotion();
 
   useEffect(() => {
@@ -54,9 +57,18 @@ export default function Home() {
     return () => query.removeEventListener("change", apply);
   }, []);
 
-  const scrollToScene = (index: number) => {
+  useEffect(() => () => audio.current?.pause(), []);
+
+  useEffect(() => {
+    const player = audio.current;
+    if (!player) return;
+    // Keep the soundtrack atmospheric: 6% at entry, rising gently to 34%.
+    player.volume = Math.min(0.34, 0.06 + progress * 0.28);
+  }, [progress]);
+
+  const scrollToScene = (index: number, behavior: ScrollBehavior = reduced ? "auto" : "smooth") => {
     if (!story.current) return;
-    window.scrollTo({ top: story.current.offsetTop + (window.innerHeight * 9 * index / 9), behavior: reduced ? "auto" : "smooth" });
+    window.scrollTo({ top: story.current.offsetTop + (window.innerHeight * 9 * index / 9), behavior });
   };
   const visualOpacity = (index: number) => {
     const focus = index / 9;
@@ -89,16 +101,48 @@ export default function Home() {
     if (!/^\S+@\S+\.\S+$/.test(email)) { setStatus("error"); return; }
     setStatus("success");
   };
+  const toggleAudio = async () => {
+    const player = audio.current;
+    if (!player) return;
+    if (audioOn) {
+      player.pause();
+      setAudioOn(false);
+      return;
+    }
+    try {
+      await player.play();
+      setAudioOn(true);
+    } catch {
+      setAudioOn(false);
+    }
+  };
+  const beginExperience = async () => {
+    setStarted(true);
+    window.requestAnimationFrame(() => scrollToScene(1, "auto"));
+    const player = audio.current;
+    if (!player) return;
+    player.volume = 0.06;
+    try {
+      await player.play();
+      setAudioOn(true);
+    } catch {
+      setAudioOn(false);
+    }
+  };
 
   return <main className={videoReady ? "video-ready" : ""}>
+    <audio ref={audio} loop autoPlay preload="metadata" onPlay={() => setAudioOn(true)} onPause={() => setAudioOn(false)}>
+      <source src="/audio/kripa-atmosphere.mp3" type="audio/mpeg" />
+    </audio>
     <header className="site-header" aria-label="Primary navigation">
       <button className="wordmark" onClick={() => scrollToScene(0)}>PROJECT KRIPA</button>
-      <nav><button onClick={() => scrollToScene(1)}>ABOUT</button><button onClick={() => scrollToScene(3)}>HOW IT WORKS</button><button onClick={() => scrollToScene(9)}>JOIN</button></nav>
+      <nav><button onClick={() => scrollToScene(1)}>ABOUT</button><button onClick={() => scrollToScene(3)}>HOW IT WORKS</button><button onClick={() => scrollToScene(9)}>JOIN</button><button type="button" className={`audio-toggle ${audioOn ? "is-active" : ""}`} onClick={toggleAudio} aria-pressed={audioOn} aria-label={audioOn ? "Turn ambient audio off" : "Turn ambient audio on"} title={audioOn ? "Audio on" : "Audio off"}>{audioOn ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Zm12.1 2a3.7 3.7 0 0 0-1.8-3.2v6.4a3.7 3.7 0 0 0 1.8-3.2Zm0-8.4v2.2a6.6 6.6 0 0 1 0 12.4v2.2a8.8 8.8 0 0 0 0-16.8Z" /></svg> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Zm10.2 2 3.2 3.2 1.5-1.5-3.2-3.2 3.2-3.2-1.5-1.5-3.2 3.2-3.2-3.2-1.5 1.5 3.2 3.2-3.2 3.2 1.5 1.5 3.2-3.2Z" /></svg>}</button></nav>
     </header>
+    {!started && <section className="begin-overlay" aria-label="Begin the Project Kripa experience"><p>PROJECT KRIPA</p><h1>A quieter way<br />to <em>return.</em></h1><button type="button" onClick={beginExperience}>BEGIN THE RITUAL</button></section>}
     <section ref={story} className="story" aria-label="Project Kripa story">
       <div className="stage">
         <div className="atmosphere" aria-hidden="true"><span /><span /><span /><span /></div>
-        <ScrollVideo progress={progress} enabled={!reduced && !mobile && canvasActive} opacity={videoOpacity} onReady={setVideoReady} />
+        <ScrollVideo progress={progress} enabled={started && !reduced && !mobile && canvasActive} opacity={videoOpacity} onReady={setVideoReady} />
         <div className="mobile-ring" aria-hidden="true" />
         {[4, 5, 6, 8, 9].map(index => <div key={index} className={`plate plate-${index}`} style={{ opacity: index === 8 ? deskOpacity() : visualOpacity(index) }} aria-hidden="true" />)}
         <div className="thumb-direction" style={{ opacity: visualOpacity(5) }} aria-hidden="true">↓</div>
