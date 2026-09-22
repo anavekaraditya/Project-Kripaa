@@ -6,8 +6,8 @@ const display = Literata({ subsets: ["latin"], weight: "variable", style: ["norm
 const sans = Albert_Sans({ subsets: ["latin"], weight: "variable", variable: "--font-sans", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Project Kripa — Return to what is here",
-  description: "A tactile ring for intentional movement, grounding and meditation.",
+  title: "Project Kripaa — For the moments you can’t sit still",
+  description: "A tactile ring you turn when your mind starts to wander. For the pause between tasks, and the start of meditation.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
