@@ -48,7 +48,6 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [canvasActive, setCanvasActive] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
-  const [mobile, setMobile] = useState(false);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "error" | "sending" | "success" | "failed">("idle");
   const [audioOn, setAudioOn] = useState(false);
@@ -62,14 +61,6 @@ export default function Home() {
     if (story.current) observer.observe(story.current);
     return () => { trigger.kill(); observer.disconnect(); };
   }, [reduced]);
-
-  useEffect(() => {
-    const query = matchMedia("(max-width: 760px)");
-    const apply = () => { setMobile(query.matches); if (query.matches) setVideoReady(false); };
-    apply();
-    query.addEventListener("change", apply);
-    return () => query.removeEventListener("change", apply);
-  }, []);
 
   useEffect(() => () => audio.current?.pause(), []);
 
@@ -153,7 +144,7 @@ export default function Home() {
     <section ref={story} className="story" aria-label="Project Kripaa story">
       <div className="stage">
         <div className="atmosphere" aria-hidden="true"><span /><span /><span /><span /></div>
-        <ScrollVideo progress={progress} enabled={!reduced && !mobile && canvasActive} opacity={videoOpacity} storyEnd={VIDEO_STORY_END} onReady={setVideoReady} />
+        <ScrollVideo progress={progress} enabled={!reduced && canvasActive} opacity={videoOpacity} storyEnd={VIDEO_STORY_END} onReady={setVideoReady} />
         <div className="opening-ring" style={{ opacity: Math.max(0, 1 - progress / 0.16) }} aria-hidden="true" />
         {[4, 5, 6].map(index => <div key={index} className={`plate plate-${index}`} style={{ opacity: opacityAt(scenes[index].at, 9) }} aria-hidden="true" />)}
         <div className="plate plate-8" style={{ opacity: deskOpacity }} aria-hidden="true" />
@@ -172,8 +163,7 @@ export default function Home() {
           <p className="product-name">PROJECT KRIPAA</p><h2 className="waitlist-title">A ring for restless <em>hands.</em></h2>
           <p>Turn it when your thoughts start looping — at your desk, or as you sit down to meditate.</p>
           <form onSubmit={submit} noValidate><label className="sr-only" htmlFor="email">Email address</label><input id="email" type="email" placeholder="you@email.com" value={email} onChange={e => { setEmail(e.target.value); setStatus("idle"); }} disabled={status === "sending" || status === "success"} aria-invalid={status === "error"} aria-describedby="form-message" /><button type="submit" disabled={status === "sending" || status === "success"}>{status === "sending" ? "SAVING…" : status === "success" ? "YOU’RE IN" : "SAVE MY SPOT"}</button></form>
-          <p id="form-message" className={`form-message ${status}`} role="status">{status === "error" ? "That doesn’t look like a full email yet. Try you@email.com." : status === "failed" ? "Couldn’t save that just now. Try again in a moment." : status === "success" ? "You’re on the list. We’ll write when the first rings are ready." : status === "sending" ? "Saving your spot…" : ""}</p>
-          <footer><a href="#privacy">PRIVACY</a><span /> <a href="#instagram">INSTAGRAM</a></footer>
+          <p id="form-message" className={`form-message ${status}`} role="status">{status === "error" ? "That doesn’t look like a full email yet. Try you@email.com." : status === "failed" ? "Couldn’t save that just now. Try again in a moment." : status === "success" ? "You’re on the list. We’ll email you when the first rings are ready—you’ll be among the first to get one." : status === "sending" ? "Saving your spot…" : ""}</p>
         </section>
       </div>
     </section>

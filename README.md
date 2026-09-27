@@ -17,17 +17,17 @@ Build a production bundle with `npm run build`.
 - Desktop visual motion uses the supplied scroll-scrubbed video; phones use static image plates and lightweight fades.
 - Scene 4→5 remains a deterministic CSS transition pending any separately approved generation.
 - On capable desktop browsers, the user-supplied `kripa-scroll-story.mp4` is scrubbed directly by scroll position. It is silent and lazily loaded after the opening frame; mobile, reduced-motion, and load-failure states use the existing static/procedural fallback.
-- Waitlist emails are saved to a Google Sheet through `/api/waitlist`. Add your Apps Script web app URL as `WAITLIST_WEBHOOK_URL` in `.env.local`.
+- Waitlist emails are saved to a Google Sheet and receive an automatic confirmation email through `/api/waitlist`. Add your Apps Script web app URL as `WAITLIST_WEBHOOK_URL` in `.env.local`.
 
 ## Google Sheet waitlist
 
 1. Create a Google Sheet.
 2. Extensions → Apps Script, paste `scripts/google-waitlist.gs`, and save.
-3. Deploy → New deployment → Web app. Execute as you, access **Anyone**.
+3. Deploy → New deployment → Web app. Execute as you, access **Anyone**. Approve the requested Google Sheets and email permissions when prompted.
 4. Copy the web app URL into `.env.local`:
 
 ```
 WAITLIST_WEBHOOK_URL=https://script.google.com/macros/s/…/exec
 ```
 
-5. Restart `npm run dev`. Signups append a timestamp and email to the first sheet.
+5. Restart `npm run dev`. Signups append a timestamp, email, source, and confirmation status to the first sheet. Duplicate submissions do not create another row; if a confirmation email previously failed, resubmitting retries it.
