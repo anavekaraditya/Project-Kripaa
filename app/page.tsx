@@ -49,7 +49,7 @@ export default function Home() {
   const [canvasActive, setCanvasActive] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "error" | "sending" | "success" | "failed">("idle");
+  const [status, setStatus] = useState<"idle" | "error" | "sending" | "success" | "already" | "failed">("idle");
   const [audioOn, setAudioOn] = useState(false);
   const audio = useRef<HTMLAudioElement>(null);
   const reduced = useReducedMotion();
@@ -112,7 +112,8 @@ export default function Home() {
     try {
       const response = await fetch("/api/waitlist", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
       if (!response.ok) throw new Error("waitlist");
-      setStatus("success");
+      const result = await response.json() as { status?: string };
+      setStatus(result.status === "already-joined" ? "already" : "success");
       setEmail("");
     } catch {
       setStatus("failed");
@@ -162,8 +163,8 @@ export default function Home() {
         <section className="join-panel" id="join" style={{ ...sceneMotion(WAITLIST_AT), pointerEvents: progress > 0.87 ? "auto" : "none" }} aria-label="Join the waitlist">
           <p className="product-name">PROJECT KRIPAA</p><h2 className="waitlist-title">A ring for restless <em>hands.</em></h2>
           <p>Turn it when your thoughts start looping — at your desk, or as you sit down to meditate.</p>
-          <form onSubmit={submit} noValidate><label className="sr-only" htmlFor="email">Email address</label><input id="email" type="email" placeholder="you@email.com" value={email} onChange={e => { setEmail(e.target.value); setStatus("idle"); }} disabled={status === "sending" || status === "success"} aria-invalid={status === "error"} aria-describedby="form-message" /><button type="submit" disabled={status === "sending" || status === "success"}>{status === "sending" ? "SAVING…" : status === "success" ? "YOU’RE IN" : "SAVE MY SPOT"}</button></form>
-          <p id="form-message" className={`form-message ${status}`} role="status">{status === "error" ? "That doesn’t look like a full email yet. Try you@email.com." : status === "failed" ? "Couldn’t save that just now. Try again in a moment." : status === "success" ? "You’re on the list. We’ll email you when the first rings are ready—you’ll be among the first to get one." : status === "sending" ? "Saving your spot…" : ""}</p>
+          <form onSubmit={submit} noValidate><label className="sr-only" htmlFor="email">Email address</label><input id="email" type="email" placeholder="you@email.com" value={email} onChange={e => { setEmail(e.target.value); setStatus("idle"); }} disabled={status === "sending"} aria-invalid={status === "error"} aria-describedby="form-message" /><button type="submit" disabled={status === "sending"}>{status === "sending" ? "SAVING…" : status === "success" ? "SAVE ANOTHER SPOT" : status === "already" ? "JOIN WITH ANOTHER EMAIL" : "SAVE MY SPOT"}</button></form>
+          <p id="form-message" className={`form-message ${status}`} role="status">{status === "error" ? "That doesn’t look like a full email yet. Try you@email.com." : status === "failed" ? "Couldn’t save that just now. Try again in a moment." : status === "success" ? "You’re on the list. We’ll email you when the first rings are ready—you’ll be among the first to get one." : status === "already" ? "You’re already on the waitlist. We’ll be in touch when the first rings are ready." : status === "sending" ? "Saving your spot…" : ""}</p>
         </section>
       </div>
     </section>

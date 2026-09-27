@@ -200,3 +200,51 @@ form button:hover,
 .audio-toggle svg { width: 1.28rem; height: 1.28rem; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
 .audio-toggle:hover, .audio-toggle:focus-visible { opacity: 1; }
 .audio-toggle.is-active { opacity: 1; color: #d7e7ff; }
+
+/* Make waitlist outcomes easy to notice without interrupting the story. */
+.form-message {
+  min-height: 1.25rem;
+  margin: .9rem auto !important;
+  color: #b8ccf0 !important;
+  font-size: .9rem !important;
+  line-height: 1.45 !important;
+  text-wrap: balance;
+}
+.form-message.success,
+.form-message.already,
+.form-message.error,
+.form-message.failed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  max-width: 34rem;
+  padding: .8rem 1rem;
+  border: 1px solid rgba(174, 200, 235, .4);
+  border-radius: 6px;
+  font-weight: 600;
+}
+.form-message.success,
+.form-message.already {
+  color: #e0edff !important;
+  background: rgba(71, 107, 151, .32);
+  border-color: rgba(174, 208, 255, .68);
+}
+.form-message.success::before,
+.form-message.already::before {
+  content: "✓";
+  display: grid;
+  flex: 0 0 1.25rem;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: .76rem;
+}
+.form-message.error,
+.form-message.failed {
+  color: #ffd0d0 !important;
+  background: rgba(122, 43, 53, .2);
+  border-color: rgba(255, 183, 183, .5);
+}

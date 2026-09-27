@@ -34,5 +34,12 @@ export async function POST(request: Request) {
     console.error("Waitlist webhook rejected request", response.status, response.statusText);
     return NextResponse.json({ error: "upstream", status: response.status }, { status: 502 });
   }
-  return NextResponse.json({ ok: true });
+
+  let result: { status?: string } = {};
+  try {
+    result = await response.json() as { status?: string };
+  } catch {
+    // Preserve a successful signup even if the webhook response has no JSON body.
+  }
+  return NextResponse.json({ ok: true, status: result.status });
 }
