@@ -30,15 +30,15 @@ export default function ScrollVideo({ progress, enabled, opacity, storyEnd, onRe
   useEffect(() => {
     const element = video.current;
     if (!element || !loaded) return;
-    // Mobile browsers often do not paint a video that is only being seeked
-    // until playback has started. It stays muted and scroll position remains
-    // the source of truth through the sync loop below.
-    const startDecoder = () => { void element.play().catch(() => undefined); };
-    startDecoder();
-    element.addEventListener("loadedmetadata", startDecoder);
-    element.addEventListener("canplay", startDecoder);
+    // Mobile browsers sometimes need playback to begin once before they will
+    // paint seeked frames. Warm the decoder, then pause so scroll owns time.
+    if (!matchMedia("(max-width: 760px)").matches) return;
+    const startDecoder = () => {
+      void element.play().then(() => element.pause()).catch(() => undefined);
+    };
+    if (element.readyState >= 3) startDecoder();
+    else element.addEventListener("canplay", startDecoder, { once: true });
     return () => {
-      element.removeEventListener("loadedmetadata", startDecoder);
       element.removeEventListener("canplay", startDecoder);
     };
   }, [loaded]);
@@ -48,7 +48,7 @@ export default function ScrollVideo({ progress, enabled, opacity, storyEnd, onRe
     if (!element || !loaded) return;
     let frame = 0;
     const sync = () => {
-      if (Math.abs(element.currentTime - target.current) > 1 / 48) element.currentTime = target.current;
+      if (!element.seeking && Math.abs(element.currentTime - target.current) > 1 / 48) element.currentTime = target.current;
       frame = requestAnimationFrame(sync);
     };
     frame = requestAnimationFrame(sync);
@@ -56,7 +56,7 @@ export default function ScrollVideo({ progress, enabled, opacity, storyEnd, onRe
   }, [loaded]);
 
   return <div className={`story-video ${loaded ? "is-loaded" : ""}`} style={{ opacity: loaded ? opacity : 0 }} aria-hidden="true">
-    {loaded && <video ref={video} muted playsInline autoPlay preload="auto" poster="/assets/03-ring-mechanism.png" onLoadedData={() => onReady(true)} onError={() => onReady(false)}>
+    {loaded && <video ref={video} muted playsInline preload="auto" poster="/assets/03-ring-mechanism.png" onLoadedData={() => onReady(true)} onError={() => onReady(false)}>
       <source src="/videos/kripa-scroll-story.mp4" type="video/mp4" />
     </video>}
   </div>;
